@@ -1,0 +1,75 @@
+name: roomiineforo pipeline
+
+on:
+  schedule:
+    # 商品リサーチ〜投稿作成: 毎日 09:00 JST (00:00 UTC)
+    - cron: "0 0 * * *"
+  workflow_dispatch:
+    inputs:
+      job:
+        description: "実行するジョブ (run-cycle / publish / collect-metrics / improve)"
+        required: true
+        default: "run-cycle"
+
+jobs:
+  run-cycle:
+    if: github.event_name == 'schedule' || github.event.inputs.job == 'run-cycle'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install -r requirements.txt && pip install -e .
+      - uses: actions/cache@v4
+        with:
+          path: data
+          key: roomiineforo-data-${{ github.run_id }}
+          restore-keys: roomiineforo-data-
+      - env:
+          RAKUTEN_APP_ID: ${{ secrets.RAKUTEN_APP_ID }}
+          RAKUTEN_AFFILIATE_ID: ${{ secrets.RAKUTEN_AFFILIATE_ID }}
+        run: python -m roomiineforo.cli run-cycle --keyword "生活雑貨"
+      # 下書きはDBに pending_review として保存される。
+      # 人間が `review list` / `review approve` / `review reject` で最終チェックを行うこと。
+
+  publish-approved:
+    # 人間が承認した下書きだけが対象になるため、定期実行しても安全
+    if: github.event.inputs.job == 'publish'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install -r requirements.txt && pip install -e .
+      - uses: actions/cache@v4
+        with:
+          path: data
+          key: roomiineforo-data-${{ github.run_id }}
+          restore-keys: roomiineforo-data-
+      - env:
+          THREADS_ACCESS_TOKEN: ${{ secrets.THREADS_ACCESS_TOKEN }}
+          THREADS_USER_ID: ${{ secrets.THREADS_USER_ID }}
+        run: python -m roomiineforo.cli publish
+
+  analyze-and-improve:
+    if: github.event.inputs.job == 'collect-metrics' || github.event.inputs.job == 'improve'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install -r requirements.txt && pip install -e .
+      - uses: actions/cache@v4
+        with:
+          path: data
+          key: roomiineforo-data-${{ github.run_id }}
+          restore-keys: roomiineforo-data-
+      - env:
+          THREADS_ACCESS_TOKEN: ${{ secrets.THREADS_ACCESS_TOKEN }}
+          THREADS_USER_ID: ${{ secrets.THREADS_USER_ID }}
+        run: |
+          python -m roomiineforo.cli collect-metrics
+          python -m roomiineforo.cli improve

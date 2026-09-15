@@ -1,0 +1,57 @@
+[
+  {
+    "item_code": "shop1:10001",
+    "name": "折りたたみ式 モバイルバッテリー 10000mAh 急速充電",
+    "price": 2980,
+    "review_avg": 4.5,
+    "review_count": 1280,
+    "shop_name": "ガジェット専門店A",
+    "item_url": "https://item.rakuten.co.jp/shop1/10001/",
+    "genre_id": "100026",
+    "genre_name": "PC周辺機器"
+  },
+  {
+    "item_code": "shop2:20002",
+    "name": "アロマディフューザー 超音波式 木目調 卓上",
+    "price": 3480,
+    "review_avg": 4.3,
+    "review_count": 620,
+    "shop_name": "インテリアショップB",
+    "item_url": "https://item.rakuten.co.jp/shop2/20002/",
+    "genre_id": "100804",
+    "genre_name": "生活雑貨"
+  },
+  {
+    "item_code": "shop3:30003",
+    "name": "ネックファン 携帯扇風機 静音 USB充電式",
+    "price": 1980,
+    "review_avg": 4.1,
+    "review_count": 3200,
+    "shop_name": "夏物家電ストアC",
+    "item_url": "https://item.rakuten.co.jp/shop3/30003/",
+    "genre_id": "100026",
+    "genre_name": "PC周辺機器"
+  },
+  {
+    "item_code": "shop4:40004",
+    "name": "低反発クッション 姿勢サポート オフィスチェア用",
+    "price": 4280,
+    "review_avg": 4.6,
+    "review_count": 940,
+    "shop_name": "オフィス家具D",
+    "item_url": "https://item.rakuten.co.jp/shop4/40004/",
+    "genre_id": "100371",
+    "genre_name": "家具"
+  },
+  {
+    "item_code": "shop5:50005",
+    "name": "ステンレスタンブラー 保温保冷 真空断熱 500ml",
+    "price": 1580,
+    "review_avg": 4.2,
+    "review_count": 2100,
+    "shop_name": "キッチン用品E",
+    "item_url": "https://item.rakuten.co.jp/shop5/50005/",
+    "genre_id": "100804",
+    "genre_name": "生活雑貨"
+  }
+]

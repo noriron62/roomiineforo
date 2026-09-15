@@ -1,0 +1,16 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "roomiineforo"
+version = "0.1.0"
+description = "Threads x Rakuten affiliate posting pipeline with human final-check gate"
+requires-python = ">=3.10"
+dependencies = [
+    "requests>=2.31",
+    "python-dotenv>=1.0",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]

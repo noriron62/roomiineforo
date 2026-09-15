@@ -1,0 +1,8 @@
+{
+  "review_avg_weight": 1.0,
+  "review_count_weight": 0.5,
+  "price_fit_weight": 0.3,
+  "genre_weights": {},
+  "target_price_min": 1500,
+  "target_price_max": 5000
+}
