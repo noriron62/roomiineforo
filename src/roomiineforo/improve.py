@@ -3,42 +3,59 @@ from collections import defaultdict
 from .db import get_conn
 from .selection import load_weights, save_weights
 
-GENRE_WEIGHT_SCALE = 2.0
+WEIGHT_SCALE = 2.0
+
+GENRE_QUERY = """
+    SELECT pr.genre_id AS group_key, m.likes, m.replies, m.reposts
+    FROM metrics m
+    JOIN posts po ON po.id = m.post_id
+    JOIN drafts d ON d.id = po.draft_id
+    JOIN products pr ON pr.id = d.product_id
+"""
+
+ANGLE_QUERY = """
+    SELECT d.angle AS group_key, m.likes, m.replies, m.reposts
+    FROM metrics m
+    JOIN posts po ON po.id = m.post_id
+    JOIN drafts d ON d.id = po.draft_id
+    WHERE d.angle != ''
+"""
 
 
 def _engagement_score(row) -> float:
     return row["likes"] + row["replies"] * 2 + row["reposts"] * 3
 
 
-def recompute_genre_weights() -> dict:
-    with get_conn() as conn:
-        rows = conn.execute(
-            """
-            SELECT pr.genre_id AS genre_id, m.likes, m.replies, m.reposts
-            FROM metrics m
-            JOIN posts po ON po.id = m.post_id
-            JOIN drafts d ON d.id = po.draft_id
-            JOIN products pr ON pr.id = d.product_id
-            """
-        ).fetchall()
-
-    weights = load_weights()
-    if not rows:
-        return weights
-
+def _normalized_weights(rows) -> dict:
     totals = defaultdict(list)
     for row in rows:
-        totals[row["genre_id"]].append(_engagement_score(row))
+        totals[row["group_key"]].append(_engagement_score(row))
+    if not totals:
+        return {}
 
-    genre_avg = {genre: sum(scores) / len(scores) for genre, scores in totals.items()}
-    overall_avg = sum(genre_avg.values()) / len(genre_avg)
-    max_deviation = max((abs(v - overall_avg) for v in genre_avg.values()), default=1.0) or 1.0
+    averages = {key: sum(scores) / len(scores) for key, scores in totals.items()}
+    overall_avg = sum(averages.values()) / len(averages)
+    max_deviation = max((abs(v - overall_avg) for v in averages.values()), default=1.0) or 1.0
 
-    genre_weights = weights.get("genre_weights", {})
-    for genre, avg in genre_avg.items():
-        normalized = (avg - overall_avg) / max_deviation
-        genre_weights[genre] = round(normalized * GENRE_WEIGHT_SCALE, 3)
+    return {
+        key: round((avg - overall_avg) / max_deviation * WEIGHT_SCALE, 3)
+        for key, avg in averages.items()
+    }
 
-    weights["genre_weights"] = genre_weights
+
+def recompute_weights() -> dict:
+    weights = load_weights()
+    with get_conn() as conn:
+        genre_rows = conn.execute(GENRE_QUERY).fetchall()
+        angle_rows = conn.execute(ANGLE_QUERY).fetchall()
+
+    genre_result = _normalized_weights(genre_rows)
+    if genre_result:
+        weights["genre_weights"] = {**weights.get("genre_weights", {}), **genre_result}
+
+    angle_result = _normalized_weights(angle_rows)
+    if angle_result:
+        weights["angle_weights"] = {**weights.get("angle_weights", {}), **angle_result}
+
     save_weights(weights)
     return weights

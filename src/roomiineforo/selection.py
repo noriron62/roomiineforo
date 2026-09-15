@@ -8,7 +8,10 @@ from .models import Product
 
 def load_weights() -> dict:
     with open(config.WEIGHTS_PATH, encoding="utf-8") as f:
-        return json.load(f)
+        weights = json.load(f)
+    weights.setdefault("genre_weights", {})
+    weights.setdefault("angle_weights", {})
+    return weights
 
 
 def save_weights(weights: dict) -> None:

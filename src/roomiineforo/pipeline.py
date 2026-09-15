@@ -33,12 +33,15 @@ def _get_or_create_product_id(product) -> int:
 
 
 def run_cycle(keyword: str, genre_id: Optional[str] = None) -> Optional[int]:
+    weights = selection.load_weights()
     candidates = rakuten.search_products(keyword=keyword, genre_id=genre_id)
     excluded = review.rejected_item_codes()
-    chosen = selection.select_best(candidates, exclude_item_codes=excluded)
+    chosen = selection.select_best(candidates, weights=weights, exclude_item_codes=excluded)
     if chosen is None:
         return None
 
     product_id = _get_or_create_product_id(chosen)
-    text = content.build_post_text(chosen)
-    return review.create_draft(product_id, text)
+    text, angle = content.build_post_text(
+        chosen, weights=weights, exclude_angle=review.last_used_angle()
+    )
+    return review.create_draft(product_id, text, angle)

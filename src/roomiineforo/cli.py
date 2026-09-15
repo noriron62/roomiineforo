@@ -1,6 +1,6 @@
 import argparse
 
-from . import analytics, db, improve, pipeline, publish, review
+from . import analytics, content, db, improve, pipeline, publish, review
 from .db import get_conn
 
 
@@ -24,7 +24,8 @@ def cmd_review_list(_args):
             product = conn.execute(
                 "SELECT name, price FROM products WHERE id = ?", (draft.product_id,)
             ).fetchone()
-        print(f"--- draft {draft.id} ({product['name']} / {product['price']}円) ---")
+        angle_label = content.ANGLE_LABELS.get(draft.angle, draft.angle)
+        print(f"--- draft {draft.id} ({product['name']} / {product['price']}円) [{angle_label}] ---")
         print(draft.text)
         print()
 
@@ -53,7 +54,7 @@ def cmd_collect_metrics(args):
 
 
 def cmd_improve(_args):
-    weights = improve.recompute_genre_weights()
+    weights = improve.recompute_weights()
     print("重みを更新しました:")
     print(weights)
 

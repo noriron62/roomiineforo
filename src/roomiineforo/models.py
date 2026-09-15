@@ -22,6 +22,7 @@ class Draft:
     id: int
     product_id: int
     text: str
+    angle: str
     status: str
     reviewer_note: Optional[str]
     created_at: str

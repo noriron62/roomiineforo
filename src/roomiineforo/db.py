@@ -23,6 +23,7 @@ CREATE TABLE IF NOT EXISTS drafts (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     product_id INTEGER NOT NULL REFERENCES products(id),
     text TEXT NOT NULL,
+    angle TEXT NOT NULL DEFAULT '',
     status TEXT NOT NULL DEFAULT 'pending_review',
     reviewer_note TEXT,
     created_at TEXT NOT NULL DEFAULT (datetime('now')),
